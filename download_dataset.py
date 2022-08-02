@@ -96,6 +96,8 @@ def download_tar(
     for e in entity:
         entity_urls.append(root + e + "/index.html")
 
+    print(len(entity))
+    links = []
     for url in entity_urls:
         entity = url.split("/")[-2]
         logging.info("Start downloading entity %s...." % (entity))
@@ -131,33 +133,41 @@ def download_tar(
 
             file_path = os.path.join(download_dest, entity + file_name)
             try_count = 0
-            while True and (try_count < MAX_TRY):
-                try_count = try_count + 1
-                cmd = "wget -O %s %s && touch %s.download" % (
-                    file_path,
-                    link.get("href"),
-                    file_path,
-                )
-                os.system(cmd)
-                if os.path.isfile("%s.download" % (file_path)):
-                    break
-                else:
-                    logging.info(
-                        "Downloaded %s failed. Re-downloading..." % (file_path)
-                    )
+            links.append(link.get("href"))
+            # while True and (try_count < MAX_TRY):
+            #     try_count = try_count + 1
 
-            if "CHECKSUM" in file_name:
-                checksum_file = file_path
+            #     if os.path.isfile("%s.download" % (file_path)):
+            #         break
 
-            tar_files.append(file_path)
+            #     cmd = "wget -O %s %s && touch %s.download" % (
+            #         file_path,
+            #         link.get("href"),
+            #         file_path,
+            #     )
+            #     os.system(cmd)
+            #     if os.path.isfile("%s.download" % (file_path)):
+            #         break
+            #     else:
+            #         logging.info(
+            #             "Downloaded %s failed. Re-downloading..." % (file_path)
+            #         )
 
-        # check CHECKSUM
-        excluded_tar_files = checksum(tar_files, download_dest, entity, checksum_file)
-        logging.info("%s checksum has completed" % (entity))
+        #     if "CHECKSUM" in file_name:
+        #         checksum_file = file_path
 
-        # unzip tar
-        unzip_tar = [f for f in tar_files if f not in excluded_tar_files]
-        unzip(unzip_tar)
+        #     tar_files.append(file_path)
+
+        # # check CHECKSUM
+        # excluded_tar_files = checksum(tar_files, download_dest, entity, checksum_file)
+        # logging.info("%s checksum has completed" % (entity))
+
+        # # unzip tar
+        # unzip_tar = [f for f in tar_files if f not in excluded_tar_files]
+        # unzip(unzip_tar)
+    print(links)
+    with open("files.txt", 'w+') as f:
+        f.writelines(links)
 
     return True
 
